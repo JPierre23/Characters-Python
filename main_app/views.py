@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from .models import Character, Weapon
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from .forms import BattlesForm
 
 # Create your views here.
 def home(request):
@@ -16,7 +17,19 @@ def character_index(request):
 
 def character_detail(request,character_id):
     character= Character.objects.get(id=character_id)
-    return render(request,'character/detail.html',{'character':character})
+    battles_form=BattlesForm()
+    return render(request,'character/detail.html',{
+        'character':character,
+        'battles_form':battles_form,
+        },)
+
+def add_battle(request,character_id):
+    form = BattlesForm(request.POST)
+    if form.is_valid():
+        new_Battle = form.save(commit=False)
+        new_Battle.character_id=character_id
+        new_Battle.save()
+    return redirect('detail',character_id=character_id)
 
 class CharacterCreate(CreateView):
     model=Character
@@ -30,6 +43,8 @@ class CharacterUpdate(UpdateView):
 class CharacterDelete(DeleteView):
     model=Character
     success_url='/character/'
+
+
 
 def weapon_index(request):
     weapons = Weapon.objects.all()
