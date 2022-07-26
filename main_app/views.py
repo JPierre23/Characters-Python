@@ -18,9 +18,11 @@ def character_index(request):
 def character_detail(request,character_id):
     character= Character.objects.get(id=character_id)
     battles_form=BattlesForm()
+    unused_wapons = Weapon.objects.exclude(id__in = character.weapons.all().values_list('id'))
     return render(request,'character/detail.html',{
         'character':character,
         'battles_form':battles_form,
+        'weapons':unused_wapons,
         },)
 
 def add_battle(request,character_id):
@@ -53,6 +55,10 @@ def weapon_index(request):
 def weapon_detail(request,weapon_id):
     weapon= Weapon.objects.get(id=weapon_id)
     return render(request,'weapon/detail.html',{'weapon':weapon})
+
+def unused_weapon(request, character_id, weapon_id):
+    Character.objects.get(id=character_id).weapons.add(weapon_id)
+    return redirect('detail', character_id=character_id)
 
 class WeaponCreate(CreateView):
     model=Weapon
